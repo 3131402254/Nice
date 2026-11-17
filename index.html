@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light">
+  <title>发票打印助手 · PDF 合并与 A5 排版</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <svg class="svg-defs" aria-hidden="true" focusable="false">
+    <defs>
+      <symbol id="i-receipt" viewBox="0 0 24 24">
+        <path d="M6 2.8h12a1.2 1.2 0 0 1 1.2 1.2v17.2l-2.4-1.6-2.4 1.6-2.4-1.6-2.4 1.6L7.2 19.6 4.8 21.2V4A1.2 1.2 0 0 1 6 2.8Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+        <path d="M8 7h8M8 10.5h8M8 14h5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+      </symbol>
+      <symbol id="i-folder" viewBox="0 0 24 24">
+        <path d="M3 6.6A1.6 1.6 0 0 1 4.6 5h4.1l1.8 2.2h7.9A1.6 1.6 0 0 1 20 8.8v9.6a1.6 1.6 0 0 1-1.6 1.6H4.6A1.6 1.6 0 0 1 3 18.4V6.6Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+        <path d="M3.3 9.2h16.9" stroke="currentColor" stroke-width="1.7"/>
+      </symbol>
+      <symbol id="i-file" viewBox="0 0 24 24">
+        <path d="M6.2 2.8h7.1l4.5 4.5v13.9H6.2V2.8Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+        <path d="M13.3 2.8v4.5h4.5M9 12.2h5.2M9 15.6h5.2M9 19h3.2" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+      </symbol>
+      <symbol id="i-single" viewBox="0 0 24 24">
+        <rect x="7" y="3" width="10" height="18" rx="1.6" fill="none" stroke="currentColor" stroke-width="1.7"/>
+        <path d="M9.5 15.4 14.5 8.6M9.5 8.6h5v5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </symbol>
+      <symbol id="i-double" viewBox="0 0 24 24">
+        <rect x="3.2" y="4.2" width="8.2" height="15.6" rx="1.4" fill="none" stroke="currentColor" stroke-width="1.6"/>
+        <rect x="12.6" y="4.2" width="8.2" height="15.6" rx="1.4" fill="none" stroke="currentColor" stroke-width="1.6"/>
+        <path d="M9.6 9.6 13.4 14.4M9.6 14.4l3.8-4.8" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+      </symbol>
+      <symbol id="i-sliders" viewBox="0 0 24 24">
+        <path d="M4 7h6M14 7h6M4 17h10M18 17h2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        <circle cx="12" cy="7" r="2.2" fill="none" stroke="currentColor" stroke-width="1.7"/>
+        <circle cx="16" cy="17" r="2.2" fill="none" stroke="currentColor" stroke-width="1.7"/>
+      </symbol>
+      <symbol id="i-download" viewBox="0 0 24 24">
+        <path d="M12 3.5v11.2M7.6 10.5 12 14.9l4.4-4.4" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M4.5 17.2v1.9a1.6 1.6 0 0 0 1.6 1.6h11.8a1.6 1.6 0 0 0 1.6-1.6v-1.9" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/>
+      </symbol>
+      <symbol id="i-check" viewBox="0 0 24 24">
+        <path d="m4.8 12.5 4.6 4.6L19.4 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+      </symbol>
+      <symbol id="i-arrow-left" viewBox="0 0 24 24">
+        <path d="M19 12H5m6-6-6 6 6 6" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+      </symbol>
+      <symbol id="i-arrow-right" viewBox="0 0 24 24">
+        <path d="M5 12h14m-6-6 6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+      </symbol>
+      <symbol id="i-refresh" viewBox="0 0 24 24">
+        <path d="M19.5 10.2A7.8 7.8 0 0 0 5.4 7.3L3.5 9.2M3.5 4.8v4.4h4.4M4.5 13.8a7.8 7.8 0 0 0 14.1 2.9l1.9-1.9m0 4.4v-4.4h-4.4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </symbol>
+      <symbol id="i-open" viewBox="0 0 24 24">
+        <path d="M13.5 4.5H20v6.5M20 4.5l-8.4 8.4" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M18 14.2v4.2a1.6 1.6 0 0 1-1.6 1.6H5.6A1.6 1.6 0 0 1 4 18.4V7.6A1.6 1.6 0 0 1 5.6 6h4.2" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/>
+      </symbol>
+      <symbol id="i-trash" viewBox="0 0 24 24">
+        <path d="M4.5 7h15M9.2 7V4.8h5.6V7M6.7 7l.9 12.2a1.4 1.4 0 0 0 1.4 1.3h6a1.4 1.4 0 0 0 1.4-1.3L17.3 7M10 10.8v6.4M14 10.8v6.4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+      </symbol>
+      <symbol id="i-up" viewBox="0 0 24 24">
+        <path d="m6.5 14.5 5.5-5.5 5.5 5.5" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+      </symbol>
+      <symbol id="i-down" viewBox="0 0 24 24">
+        <path d="m6.5 9.5 5.5 5.5 5.5-5.5" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+      </symbol>
+      <symbol id="i-printer" viewBox="0 0 24 24">
+        <path d="M7 8.5V3.8h10v4.7M7 17.2H4.6A1.6 1.6 0 0 1 3 15.6v-5.2a1.6 1.6 0 0 1 1.6-1.6h14.8A1.6 1.6 0 0 1 21 10.4v5.2a1.6 1.6 0 0 1-1.6 1.6H17" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+        <rect x="7" y="14.2" width="10" height="6" rx="1" fill="none" stroke="currentColor" stroke-width="1.7"/>
+        <circle cx="17.2" cy="11.4" r="0.9" fill="currentColor"/>
+      </symbol>
+      <symbol id="i-lock" viewBox="0 0 24 24">
+        <rect x="4.8" y="10.2" width="14.4" height="10.4" rx="2" fill="none" stroke="currentColor" stroke-width="1.7"/>
+        <path d="M8.1 10.2V7.7a3.9 3.9 0 0 1 7.8 0v2.5M12 14.3v2.3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+      </symbol>
+      <symbol id="i-info" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.7"/>
+        <path d="M12 10.6v5.1M12 7.6v.2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </symbol>
+      <symbol id="i-rotate" viewBox="0 0 24 24">
+        <path d="M18.8 8.2A7.6 7.6 0 1 0 19.5 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        <path d="M18.8 3.8v4.4h-4.4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </symbol>
+      <symbol id="i-spark" viewBox="0 0 24 24">
+        <path d="M12 2.8c.5 4.9 1.7 6.1 6.6 6.6-4.9.5-6.1 1.7-6.6 6.6-.5-4.9-1.7-6.1-6.6-6.6 4.9-.5 6.1-1.7 6.6-6.6Z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+        <path d="M18.5 15.2c.25 2.2.8 2.75 3 3-2.2.25-2.75.8-3 3-.25-2.2-.8-2.75-3-3 2.2-.25 2.75-.8 3-3Z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
+      </symbol>
+    </defs>
+  </svg>
+
+  <div class="bg-ornament" aria-hidden="true">
+    <span class="blob blob-a"></span>
+    <span class="blob blob-b"></span>
+    <span class="blob blob-c"></span>
+    <div class="grain"></div>
+  </div>
+
+  <div class="app-shell">
+    <header class="app-header">
+      <div class="brand">
+        <div class="brand-mark">
+          <svg class="icon"><use href="#i-receipt"></use></svg>
+        </div>
+        <div class="brand-text">
+          <div class="brand-title-row">
+            <h1>发票打印助手</h1>
+            <span class="brand-badge">A5 排版</span>
+          </div>
+          <p>筛选 · 排序重命名 · 合并 · A5 排版 · 导出，一次完成</p>
+        </div>
+      </div>
+      <div class="privacy-pill">
+        <svg class="icon"><use href="#i-lock"></use></svg>
+        全部本地处理，文件不会上传
+      </div>
+    </header>
+
+    <nav class="stepper panel-lite" id="stepper" aria-label="处理步骤">
+      <div class="stepper-track" aria-hidden="true">
+        <div class="stepper-fill" id="stepperFill"></div>
+      </div>
+      <button class="step-item is-active" type="button" data-step="1">
+        <span class="step-dot"><span>1</span></span>
+        <span class="step-text"><b>选择文件</b><small>筛选与排序</small></span>
+      </button>
+      <button class="step-item" type="button" data-step="2">
+        <span class="step-dot"><span>2</span></span>
+        <span class="step-text"><b>合并设置</b><small>单页或双页</small></span>
+      </button>
+      <button class="step-item" type="button" data-step="3">
+        <span class="step-dot"><span>3</span></span>
+        <span class="step-text"><b>A5 排版</b><small>预览与调整</small></span>
+      </button>
+      <button class="step-item" type="button" data-step="4">
+        <span class="step-dot"><span>4</span></span>
+        <span class="step-text"><b>导出打印</b><small>保存到桌面</small></span>
+      </button>
+    </nav>
+
+    <main>
+      <!-- 步骤 1 -->
+      <section class="panel step-panel is-active" id="step-1" aria-labelledby="step1Title">
+        <div class="panel-head">
+          <div>
+            <span class="kicker">STEP 01</span>
+            <h2 id="step1Title">选择发票文件夹</h2>
+            <p class="muted">自动识别 PDF，按修改时间排序并生成连续的新文件名。原文件不会被修改。</p>
+          </div>
+          <span class="head-tag" id="fileCountTag" hidden>0 个 PDF</span>
+        </div>
+
+        <div class="dropzone" id="dropzone">
+          <div class="dropzone-icon">
+            <span class="pulse-ring"></span>
+            <svg class="icon"><use href="#i-folder"></use></svg>
+          </div>
+          <h3>把发票文件夹拖到这里</h3>
+          <p>或者点击下方按钮选择文件夹，仅处理其中的 PDF 文件</p>
+          <div class="dropzone-actions">
+            <button class="btn btn-primary" type="button" id="pickFolderBtn">
+              <svg class="icon"><use href="#i-folder"></use></svg>
+              选择文件夹
+            </button>
+            <button class="btn btn-ghost" type="button" id="addFilesBtn">
+              <svg class="icon"><use href="#i-file"></use></svg>
+              添加 PDF 文件
+            </button>
+          </div>
+          <input type="file" id="folderInput" webkitdirectory directory multiple hidden>
+          <input type="file" id="filesInput" accept="application/pdf,.pdf" multiple hidden>
+        </div>
+
+        <div class="files-area" id="filesArea" hidden>
+          <div class="naming-bar">
+            <div class="naming-fields">
+              <label class="field">
+                <span>文件名前缀</span>
+                <input type="text" id="prefixInput" value="发票" maxlength="20" placeholder="可留空">
+              </label>
+              <label class="field field-sm">
+                <span>起始序号</span>
+                <input type="number" id="startInput" value="1" min="1" max="9999" step="1">
+              </label>
+              <label class="field field-sm">
+                <span>序号位数</span>
+                <select id="digitsSelect">
+                  <option value="2">2 位</option>
+                  <option value="3" selected>3 位</option>
+                  <option value="4">4 位</option>
+                </select>
+              </label>
+              <div class="field">
+                <span>排序方式</span>
+                <div class="segmented segmented-sm" id="sortSegmented">
+                  <button type="button" class="is-active" data-sort="asc">修改时间升序</button>
+                  <button type="button" data-sort="desc">修改时间降序</button>
+                </div>
+              </div>
+            </div>
+            <div class="naming-tools">
+              <button class="btn btn-soft btn-sm" type="button" id="renameOriginBtn" hidden>
+                <svg class="icon"><use href="#i-refresh"></use></svg>
+                同步重命名原文件夹
+              </button>
+              <button class="btn btn-soft btn-sm" type="button" id="reselectBtn">
+                重新选择
+              </button>
+            </div>
+          </div>
+
+          <div class="list-toolbar">
+            <div class="list-summary" id="listSummary">已按修改时间升序排列</div>
+            <div class="legend">
+              <span class="legend-dot"></span>
+              新文件名将用于合并顺序
+            </div>
+          </div>
+
+          <div class="file-table-wrap">
+            <table class="file-table">
+              <thead>
+                <tr>
+                  <th class="col-order">顺序</th>
+                  <th class="col-new">新文件名</th>
+                  <th class="col-origin">原文件名</th>
+                  <th class="col-date">修改时间</th>
+                  <th class="col-size">大小</th>
+                  <th class="col-actions">调整</th>
+                </tr>
+              </thead>
+              <tbody id="fileTbody"></tbody>
+            </table>
+          </div>
+
+          <div class="step-actions">
+            <div class="hint-line">
+              <svg class="icon"><use href="#i-info"></use></svg>
+              新文件名默认只用于合并顺序；如需写回原文件夹，可使用上方“同步重命名原文件夹”。
+            </div>
+            <button class="btn btn-primary btn-lg" type="button" id="next1Btn">
+              下一步：合并设置
+              <svg class="icon"><use href="#i-arrow-right"></use></svg>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 步骤 2 -->
+      <section class="panel step-panel" id="step-2" aria-labelledby="step2Title" hidden>
+        <div class="panel-head">
+          <div>
+            <span class="kicker">STEP 02</span>
+            <h2 id="step2Title">选择合并方式</h2>
+            <p class="muted">每个 PDF 会按照上一步的顺序依次放入合并结果。</p>
+          </div>
+          <span class="head-tag" id="modeCountTag">共 0 个文件</span>
+        </div>
+
+        <div class="mode-grid">
+          <label class="mode-card" id="modeSingleCard">
+            <input type="radio" name="mergeMode" value="single" checked>
+            <div class="mode-visual mode-visual-single" aria-hidden="true">
+              <span class="mini-page"></span>
+              <span class="mini-page"></span>
+              <span class="mini-page"></span>
+            </div>
+            <div class="mode-content">
+              <div class="mode-title-row">
+                <h3>单页合并</h3>
+                <span class="mode-chip">推荐</span>
+              </div>
+              <p>每个文件按顺序占一页，适合一张发票一页的常见情况。</p>
+              <div class="mode-example">A → B → C</div>
+            </div>
+            <span class="mode-check"><svg class="icon"><use href="#i-check"></use></svg></span>
+          </label>
+
+          <label class="mode-card" id="modeDoubleCard">
+            <input type="radio" name="mergeMode" value="double">
+            <div class="mode-visual mode-visual-double" aria-hidden="true">
+              <span class="mini-page"></span>
+              <span class="mini-page is-copy"></span>
+              <span class="mini-page"></span>
+              <span class="mini-page is-copy"></span>
+            </div>
+            <div class="mode-content">
+              <div class="mode-title-row">
+                <h3>双页合并</h3>
+                <span class="mode-chip mode-chip-soft">一式两份</span>
+              </div>
+              <p>每页复制一份，各自独立成页，顺序为 A、A、B、B、C、C。</p>
+              <div class="mode-example">A → A → B → B → C → C</div>
+            </div>
+            <span class="mode-check"><svg class="icon"><use href="#i-check"></use></svg></span>
+          </label>
+        </div>
+
+        <div class="order-preview-card">
+          <div class="order-preview-head">
+            <h3>合并顺序预览</h3>
+            <span id="orderPageEstimate">等待生成</span>
+          </div>
+          <div class="order-flow" id="orderFlow"></div>
+        </div>
+
+        <div class="step-actions step-actions-between">
+          <button class="btn btn-ghost" type="button" id="back2Btn">
+            <svg class="icon"><use href="#i-arrow-left"></use></svg>
+            上一步
+          </button>
+          <button class="btn btn-primary btn-lg" type="button" id="generateBtn">
+            <svg class="icon"><use href="#i-spark"></use></svg>
+            生成合并预览
+          </button>
+        </div>
+      </section>
+
+      <!-- 步骤 3 -->
+      <section class="panel step-panel" id="step-3" aria-labelledby="step3Title" hidden>
+        <div class="panel-head">
+          <div>
+            <span class="kicker">STEP 03</span>
+            <h2 id="step3Title">A5 排版与预览</h2>
+            <p class="muted">优先保持发票原尺寸；超出 A5 可打印区域时自动等比缩小，保证内容完整。</p>
+          </div>
+          <span class="head-tag" id="previewPageTag">0 页</span>
+        </div>
+
+        <div class="preview-grid">
+          <aside class="settings-card">
+            <div class="settings-head">
+              <h3><svg class="icon"><use href="#i-sliders"></use></svg> 排版设置</h3>
+              <button class="text-btn" type="button" id="resetLayoutBtn">恢复默认</button>
+            </div>
+
+            <div class="setting-group">
+              <span class="setting-label">缩放方式</span>
+              <div class="layout-options">
+                <label class="layout-option is-checked">
+                  <input type="radio" name="layoutMode" value="smart" checked>
+                  <span class="layout-radio"></span>
+                  <span class="layout-copy">
+                    <b>智能适配 A5</b>
+                    <small>优先 100% 原尺寸，放不下才等比缩小</small>
+                  </span>
+                </label>
+                <label class="layout-option">
+                  <input type="radio" name="layoutMode" value="fill">
+                  <span class="layout-radio"></span>
+                  <span class="layout-copy">
+                    <b>铺满 A5</b>
+                    <small>等比放大或缩小，尽量填满可打印区域</small>
+                  </span>
+                </label>
+                <label class="layout-option">
+                  <input type="radio" name="layoutMode" value="actual">
+                  <span class="layout-radio"></span>
+                  <span class="layout-copy">
+                    <b>1:1 原尺寸</b>
+                    <small>页面随发票尺寸，长边作为页面长边</small>
+                  </span>
+                </label>
+              </div>
+            </div>
+
+            <div class="setting-group" id="orientationGroup">
+              <span class="setting-label">纸张方向</span>
+              <div class="segmented" id="orientationSegmented">
+                <button type="button" class="is-active" data-orientation="auto">自动</button>
+                <button type="button" data-orientation="portrait">纵向</button>
+                <button type="button" data-orientation="landscape">横向</button>
+              </div>
+            </div>
+
+            <div class="setting-group">
+              <div class="setting-label-row">
+                <span class="setting-label">页面边距</span>
+                <span class="value-badge" id="marginValue">2 mm</span>
+              </div>
+              <input type="range" id="marginRange" min="0" max="20" value="2" step="1">
+              <div class="range-scale"><span>0</span><span>10</span><span>20 mm</span></div>
+            </div>
+
+            <div class="layout-summary" id="layoutSummary">
+              <div class="summary-row"><span>输出页数</span><b id="sumPages">—</b></div>
+              <div class="summary-row"><span>纸张尺寸</span><b id="sumPaper">—</b></div>
+              <div class="summary-row"><span>缩放范围</span><b id="sumScale">—</b></div>
+              <div class="summary-row"><span>文件大小</span><b id="sumSize">—</b></div>
+            </div>
+
+            <div class="tip-box">
+              <svg class="icon"><use href="#i-info"></use></svg>
+              <p>打印时请选择 <b>A5 纸张</b>，缩放选项选择 <b>实际大小 / 100%</b>，并关闭“适合边框”。</p>
+            </div>
+          </aside>
+
+          <div class="preview-card">
+            <div class="preview-toolbar">
+              <div class="preview-title">
+                <span class="live-dot"></span>
+                合并结果预览
+              </div>
+              <div class="preview-tools">
+                <button class="icon-btn" type="button" id="refreshPreviewBtn" title="重新生成预览">
+                  <svg class="icon"><use href="#i-refresh"></use></svg>
+                </button>
+                <button class="btn btn-ghost btn-sm" type="button" id="openPreviewBtn">
+                  <svg class="icon"><use href="#i-open"></use></svg>
+                  新窗口打开
+                </button>
+              </div>
+            </div>
+            <div class="preview-frame-wrap">
+              <iframe id="previewFrame" title="合并后的 PDF 预览"></iframe>
+              <div class="preview-loading" id="previewLoading">
+                <span class="spinner"></span>
+                <p>正在排版 PDF…</p>
+              </div>
+            </div>
+
+            <div class="page-strip-head">
+              <h3>页面结构</h3>
+              <span>色块代表发票在 A5 纸张上的位置</span>
+            </div>
+            <div class="page-strip" id="pageStrip"></div>
+          </div>
+        </div>
+
+        <div class="step-actions step-actions-between">
+          <button class="btn btn-ghost" type="button" id="back3Btn">
+            <svg class="icon"><use href="#i-arrow-left"></use></svg>
+            上一步
+          </button>
+          <button class="btn btn-primary btn-lg" type="button" id="next3Btn">
+            下一步：导出
+            <svg class="icon"><use href="#i-arrow-right"></use></svg>
+          </button>
+        </div>
+      </section>
+
+      <!-- 步骤 4 -->
+      <section class="panel step-panel" id="step-4" aria-labelledby="step4Title" hidden>
+        <div class="panel-head">
+          <div>
+            <span class="kicker">STEP 04</span>
+            <h2 id="step4Title">导出并打印</h2>
+            <p class="muted">选择保存位置，默认定位到桌面。保存后即可用 A5 纸张打印。</p>
+          </div>
+          <span class="head-tag head-tag-success"><svg class="icon"><use href="#i-check"></use></svg> 已就绪</span>
+        </div>
+
+        <div class="export-card">
+          <div class="export-hero">
+            <div class="export-icon">
+              <svg class="icon"><use href="#i-file"></use></svg>
+            </div>
+            <div class="export-copy">
+              <h3>合并完成</h3>
+              <p id="exportDetail">—</p>
+            </div>
+          </div>
+
+          <div class="export-stats">
+            <div class="stat"><span>总页数</span><b id="exportPages">—</b></div>
+            <div class="stat"><span>文件大小</span><b id="exportSize">—</b></div>
+            <div class="stat"><span>页面尺寸</span><b id="exportPaper">—</b></div>
+            <div class="stat"><span>合并方式</span><b id="exportMode">—</b></div>
+          </div>
+
+          <div class="save-row">
+            <label class="field save-field">
+              <span>保存文件名</span>
+              <div class="filename-input">
+                <input type="text" id="outputNameInput" maxlength="80">
+                <em>.pdf</em>
+              </div>
+            </label>
+            <button class="btn btn-primary btn-xl" type="button" id="saveBtn">
+              <svg class="icon"><use href="#i-download"></use></svg>
+              保存 PDF 到桌面
+            </button>
+          </div>
+
+          <div class="export-actions">
+            <button class="btn btn-ghost" type="button" id="printBtn">
+              <svg class="icon"><use href="#i-printer"></use></svg>
+              打开打印视图
+            </button>
+            <button class="btn btn-ghost" type="button" id="restartBtn">
+              <svg class="icon"><use href="#i-refresh"></use></svg>
+              处理新一批发票
+            </button>
+          </div>
+
+          <div class="save-note">
+            <svg class="icon"><use href="#i-info"></use></svg>
+            <span>支持的浏览器会打开“另存为”窗口并默认定位到桌面；若浏览器不支持，将自动下载到默认下载文件夹。</span>
+          </div>
+        </div>
+
+        <div class="print-guide">
+          <h3>A5 打印小贴士</h3>
+          <div class="guide-grid">
+            <div class="guide-item"><span>01</span><p>纸张选择 <b>A5</b>，纵向或横向按预览自动选择。</p></div>
+            <div class="guide-item"><span>02</span><p>缩放选择 <b>实际大小 / 100%</b>，不要选择“适合页面”。</p></div>
+            <div class="guide-item"><span>03</span><p>双面打印时选择<b>短边翻转</b>，避免背面对不齐。</p></div>
+          </div>
+        </div>
+
+        <div class="step-actions">
+          <button class="btn btn-ghost" type="button" id="back4Btn">
+            <svg class="icon"><use href="#i-arrow-left"></use></svg>
+            返回调整排版
+          </button>
+        </div>
+      </section>
+    </main>
+
+    <footer class="app-footer">
+      <span>发票打印助手</span>
+      <span class="footer-dot"></span>
+      <span>单文件本地运行</span>
+      <span class="footer-dot"></span>
+      <span>基于 pdf-lib</span>
+    </footer>
+  </div>
+
+  <div class="busy-overlay" id="busyOverlay" hidden>
+    <div class="busy-card">
+      <div class="busy-spinner"><span></span></div>
+      <h3 id="busyTitle">正在处理</h3>
+      <p id="busyText">请稍候…</p>
+      <div class="busy-bar"><i id="busyBar"></i></div>
+      <small id="busyDetail"></small>
+    </div>
+  </div>
+
+  <div class="toast-stack" id="toastStack" aria-live="polite"></div>
+
+  <script src="libs/pdf-lib.min.js"></script>
+  <script src="pdf-core.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
